@@ -35,12 +35,12 @@ def search(q, cursor=None, since=None):
     if cursor:
         body["cursor"] = cursor
     for _ in range(3):
-        r = subprocess.run(["treg", "call", "anyapi.x.search.posts", "--method", "POST", "--data", json.dumps(body)],
-                           capture_output=True, text=True, timeout=120)
         try:
+            r = subprocess.run(["treg", "call", "anyapi.x.search.posts", "--method", "POST", "--data", json.dumps(body)],
+                               capture_output=True, text=True, timeout=90)
             d = json.loads(r.stdout).get("output", {}).get("data", {})
             return d.get("items") or [], d.get("nextCursor")
-        except Exception:
+        except Exception:  # timeouts, bad JSON, provider errors: retry, then skip
             time.sleep(2)
     return [], None
 
