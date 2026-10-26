@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Unfarm settings</title>
+  <link rel="stylesheet" href="ui.css">
+</head>
+<body class="options">
+  <h1>Unfarm settings</h1>
+  <p class="muted">Everything runs in your browser. Unfarm downloads a public list of copy-paste clusters and farm accounts a few times a day. It never sends what you read anywhere.</p>
+
+  <section>
+    <h2>What to hide</h2>
+    <div class="card">
+      <label class="check"><input type="checkbox" data-cat="copypasta"><span><b>Copy-pasted posts.</b> The same post published by several accounts, from the public list or seen twice in your own feed.</span></label>
+      <label class="check"><input type="checkbox" data-cat="farms"><span><b>Farm accounts.</b> Accounts caught copy-pasting posts more than once. Each one links to its receipts.</span></label>
+      <label class="check"><input type="checkbox" data-cat="bait"><span><b>AI engagement bait.</b> “This is f*cking insane”, “50 websites that feel illegal”, “bookmark this”, “instead of Netflix tonight” and similar templates.</span></label>
+    </div>
+  </section>
+
+  <section>
+    <h2>Never hide these accounts</h2>
+    <div class="card">
+      <div class="row"><input type="text" id="wlAdd" placeholder="@handle"><button type="button" id="wlBtn">Add</button></div>
+      <ul id="wl"></ul>
+    </div>
+  </section>
+
+  <section>
+    <h2>Stats</h2>
+    <div class="card"><p id="totals" class="muted">–</p><button type="button" id="reset">Reset today's stats</button></div>
+  </section>
+
+  <p class="muted small" style="margin-top:28px">Unfarm is open source: <a href="https://github.com/aluz123/unfarm" target="_blank" rel="noopener">github.com/aluz123/unfarm</a>. Wrongly flagged account? Open an issue with the link and it comes off the list.</p>
+  <script type="module" src="options.js"></script>
+</body>
+</html>

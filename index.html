@@ -1,0 +1,281 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Unfarm · Clean your X feed</title>
+  <meta name="description" content="AI slop on X isn't random: the same posts get copy-pasted by dozens of accounts. Unfarm hides copy-paste farms and AI engagement bait, with receipts. Free, open source, no API key.">
+  <meta property="og:title" content="Unfarm: clean your X feed">
+  <meta property="og:description" content="Hides copy-paste engagement farms and AI bait on X, with receipts. Free, open source, nothing leaves your browser.">
+  <meta property="og:image" content="https://aluz123.github.io/unfarm/assets/og.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" href="assets/icon-256.png">
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #faf8f6; --surface: #ffffff; --surface-2: #f3efeb; --border: #e6dfd8;
+      --text: #1b1714; --text-2: #4f463f; --muted: #7a6f66;
+      --accent: #c2541b; --accent-ink: #fff; --accent-soft: #fbe9dd;
+      --ok: #1d6b2e; --ok-bg: #e7f4ea; --warn: #8a4b06; --warn-bg: #fdf0dc;
+      --radius: 14px; --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      --shadow: 0 1px 2px rgba(27,23,20,.05), 0 6px 20px rgba(27,23,20,.05);
+    }
+    @media (prefers-color-scheme: dark) {
+      :root:where(:not([data-theme="light"])) {
+        color-scheme: dark;
+        --bg: #12100e; --surface: #1b1815; --surface-2: #24201c; --border: #362f29;
+        --text: #f4efea; --text-2: #cfc5bb; --muted: #a39789;
+        --accent: #f08a4b; --accent-ink: #1b1209; --accent-soft: #3a2415;
+        --ok: #8fe0a2; --ok-bg: #143020; --warn: #ffd08a; --warn-bg: #3a2a10;
+        --shadow: 0 1px 2px rgba(0,0,0,.3), 0 6px 20px rgba(0,0,0,.25);
+      }
+    }
+    :root[data-theme="dark"] {
+      color-scheme: dark;
+      --bg: #12100e; --surface: #1b1815; --surface-2: #24201c; --border: #362f29;
+      --text: #f4efea; --text-2: #cfc5bb; --muted: #a39789;
+      --accent: #f08a4b; --accent-ink: #1b1209; --accent-soft: #3a2415;
+      --ok: #8fe0a2; --ok-bg: #143020; --warn: #ffd08a; --warn-bg: #3a2a10;
+      --shadow: 0 1px 2px rgba(0,0,0,.3), 0 6px 20px rgba(0,0,0,.25);
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.55 var(--font); }
+    a { color: var(--accent); text-underline-offset: 2px; }
+    .wrap { max-width: 1040px; margin: 0 auto; padding: 0 16px; }
+    header.top { display: flex; align-items: center; gap: 10px; height: 60px; }
+    header.top img { width: 28px; height: 28px; border-radius: 7px; }
+    header.top b { font-size: 18px; letter-spacing: -.01em; }
+    header.top nav { margin-left: auto; display: flex; gap: 16px; font-size: 14px; }
+    header.top nav a { color: var(--text-2); text-decoration: none; }
+    .hero { padding: 48px 0 28px; display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 36px; align-items: center; }
+    @media (max-width: 860px) { .hero { grid-template-columns: 1fr; padding-top: 24px; } }
+    h1 { font-size: clamp(36px, 6vw, 60px); line-height: 1.02; letter-spacing: -.035em; margin: 0; }
+    .lede { font-size: 19px; color: var(--text-2); margin: 18px 0 0; max-width: 560px; }
+    .cta { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 24px; }
+    .btn { display: inline-flex; align-items: center; gap: 8px; height: 46px; padding: 0 18px; border-radius: 12px; font-weight: 700; font-size: 15px; text-decoration: none; border: 1px solid var(--border); color: var(--text); background: var(--surface); cursor: pointer; font-family: inherit; }
+    .btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+    .small { font-size: 13px; color: var(--muted); }
+    .demo { background: var(--surface); border: 1px solid var(--border); border-radius: 18px; box-shadow: var(--shadow); padding: 14px; display: grid; gap: 10px; }
+    .post { border: 1px solid var(--border); border-radius: 14px; padding: 12px 14px; font-size: 14.5px; background: var(--bg); }
+    .post .who { font-weight: 700; font-size: 13.5px; }
+    .post .who span { color: var(--muted); font-weight: 400; }
+    .post p { margin: 4px 0 0; }
+    .banner { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; border: 1px solid var(--border); border-radius: 12px; padding: 8px 12px; background: var(--surface-2); font-size: 13.5px; }
+    .banner .mark { width: 14px; height: 14px; border-radius: 4px; background: var(--accent); flex: none; }
+    .banner > span:nth-child(2) { flex: 1 1 180px; min-width: 0; }
+    .banner .acts { margin-left: auto; display: flex; gap: 6px; }
+    .banner .acts span { border: 1px solid var(--border); border-radius: 99px; padding: 2px 10px; font-size: 12px; }
+    .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin: 8px 0 0; }
+    .stat { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; }
+    .stat b { display: block; font-size: 30px; letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
+    .stat span { color: var(--muted); font-size: 14px; }
+    section { padding: 44px 0 0; }
+    h2 { font-size: 28px; letter-spacing: -.02em; margin: 0 0 6px; }
+    .sub { color: var(--text-2); margin: 0 0 18px; max-width: 720px; }
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); padding: 18px; }
+    textarea { width: 100%; min-height: 120px; border: 1px solid var(--border); border-radius: 12px; padding: 12px; font: inherit; font-size: 15px; background: var(--bg); color: var(--text); resize: vertical; }
+    textarea:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+    .verdict { margin-top: 12px; border-radius: 12px; padding: 12px 14px; font-size: 15px; }
+    .verdict.hide { background: var(--warn-bg); color: var(--warn); }
+    .verdict.ok { background: var(--ok-bg); color: var(--ok); }
+    .verdict ul { margin: 6px 0 0; padding-left: 20px; }
+    .three { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 14px; }
+    .three .card h3 { margin: 0 0 6px; font-size: 17px; }
+    .three .card p { margin: 0; color: var(--text-2); font-size: 15px; }
+    .clusters { display: grid; gap: 10px; }
+    details.cluster { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 0; }
+    details.cluster[open] { box-shadow: var(--shadow); }
+    details.cluster summary { cursor: pointer; list-style: none; padding: 14px 16px; display: grid; grid-template-columns: 92px minmax(0, 1fr); gap: 14px; align-items: start; }
+    details.cluster summary::-webkit-details-marker { display: none; }
+    .count { text-align: center; background: var(--accent-soft); color: var(--accent); border-radius: 10px; padding: 8px 4px; font-weight: 800; font-size: 22px; line-height: 1; }
+    .count small { display: block; font-size: 11px; font-weight: 600; margin-top: 4px; }
+    .ctext { font-size: 14.5px; color: var(--text); overflow-wrap: anywhere; }
+    .cmeta { font-size: 12.5px; color: var(--muted); margin-top: 6px; }
+    .cbody { padding: 0 16px 16px 122px; font-size: 14px; }
+    @media (max-width: 600px) { details.cluster summary { grid-template-columns: 70px minmax(0, 1fr); } .cbody { padding-left: 16px; } }
+    .cbody a { margin-right: 10px; display: inline-block; }
+    details.cluster.flash { outline: 3px solid var(--accent); }
+    table.farms { width: 100%; border-collapse: collapse; font-size: 14px; }
+    table.farms th, table.farms td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--border); }
+    table.farms th { color: var(--muted); font-weight: 600; }
+    table.farms tr.flash { background: var(--accent-soft); }
+    .pricing { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px; }
+    .tier h3 { margin: 0; font-size: 20px; }
+    .tier .price { font-size: 34px; font-weight: 800; letter-spacing: -.02em; margin: 6px 0; }
+    .tier ul { margin: 10px 0 0; padding-left: 20px; color: var(--text-2); }
+    .tier.pro { border-color: var(--accent); }
+    .steps { margin: 8px 0 0; padding-left: 22px; color: var(--text-2); }
+    .steps li { margin-top: 6px; }
+    code { background: var(--surface-2); padding: 1px 6px; border-radius: 6px; font-size: 13.5px; }
+    .faq details { border-bottom: 1px solid var(--border); padding: 12px 0; }
+    .faq summary { cursor: pointer; font-weight: 600; }
+    .faq p { color: var(--text-2); margin: 8px 0 0; }
+    footer { margin: 56px 0 40px; padding-top: 18px; border-top: 1px solid var(--border); color: var(--muted); font-size: 14px; display: flex; flex-wrap: wrap; gap: 8px 22px; justify-content: space-between; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header class="top">
+      <img src="assets/icon-256.png" alt="">
+      <b>Unfarm</b>
+      <nav><a href="#check">Check a post</a><a href="#farms">Receipts</a><a href="#install">Install</a><a href="https://github.com/aluz123/unfarm">GitHub</a></nav>
+    </header>
+
+    <div class="hero">
+      <div>
+        <h1>Unfarm your X&nbsp;feed.</h1>
+        <p class="lede">AI slop on X isn't random. The same posts get copy-pasted by dozens of accounts. Unfarm catches the copies, the farm accounts and the AI engagement bait, hides them, and shows you the receipts.</p>
+        <div class="cta">
+          <a class="btn primary" href="#install">Get it for Chrome, free</a>
+          <a class="btn" href="#farms">See this week's farms</a>
+        </div>
+        <p class="small" style="margin-top:12px">Open source · no API key · no account · nothing you read leaves your browser</p>
+      </div>
+      <div class="demo" aria-label="What Unfarm looks like on X">
+        <div class="post"><div class="who">Maya Chen <span>@mayabuilds · 2h</span></div><p>Shipped the new onboarding today. Activation went from 31% to 44% in the first week, mostly from cutting two screens.</p></div>
+        <div class="banner"><span class="mark"></span><span>Hidden by Unfarm: Same post by <b id="demoN">23</b> accounts</span><span class="acts"><span>Receipts</span><span>Show</span><span>Not slop</span></span></div>
+        <div class="banner"><span class="mark"></span><span>Hidden by Unfarm: “This is f*cking insane” hook · “Bookmark/save this”</span><span class="acts"><span>Show</span><span>Not slop</span></span></div>
+        <div class="post"><div class="who">Dev Patel <span>@devp · 5h</span></div><p>Hot take: most dashboards should be a weekly email.</p></div>
+      </div>
+    </div>
+
+    <div class="stats" id="stats"></div>
+
+    <section id="check">
+      <h2>Check any post</h2>
+      <p class="sub">Paste the text of a post. Unfarm checks it against this week's copy-paste list and its bait rules, right here in your browser.</p>
+      <div class="card">
+        <textarea id="txt" placeholder="Paste a post here…"></textarea>
+        <div id="verdict"></div>
+      </div>
+    </section>
+
+    <section>
+      <h2>How it catches farms</h2>
+      <p class="sub">Other slop filters send every post to an AI model and guess. Unfarm uses evidence you can check.</p>
+      <div class="three">
+        <div class="card"><h3>1. Copy-paste fingerprints</h3><p>Every day we sample thousands of viral posts and find text that several accounts posted almost word for word. Each cluster becomes a fingerprint. If a post in your feed matches, it's hidden, with a link to every account that posted it.</p></div>
+        <div class="card"><h3>2. Farm accounts</h3><p>Accounts caught copy-pasting more than once are listed with their receipts. Their other posts are hidden too, including the AI images and videos they recycle.</p></div>
+        <div class="card"><h3>3. AI bait templates</h3><p>“This is f*cking insane”, “50 websites that feel illegal to know”, “instead of Netflix tonight”, “bookmark this”, comment-to-DM bait. Pick gentle, balanced or strict.</p></div>
+      </div>
+      <p class="small" style="margin-top:12px">Unfarm also spots copies inside your own feed: if two accounts you scroll past post the same thing, the second one is hidden.</p>
+    </section>
+
+    <section id="farms">
+      <h2>This week's copy-paste farms</h2>
+      <p class="sub" id="farmsSub">The same text, posted by different accounts. Click a cluster for the accounts and links.</p>
+      <div class="clusters" id="clusters"></div>
+      <h3 style="margin:28px 0 8px">Accounts caught copy-pasting more than once</h3>
+      <div class="card" style="padding:6px 8px; overflow-x:auto"><table class="farms" id="farmTable"></table></div>
+      <p class="small" style="margin-top:10px">Wrongly listed? <a href="https://github.com/aluz123/unfarm/issues/new?title=Remove%20account%20from%20list">Open an issue</a> with a link and it comes off. The lists are public JSON: <a href="data/fingerprints.json">fingerprints</a> · <a href="data/farms.json">farm accounts</a> · <a href="data/stats.json">stats</a>.</p>
+    </section>
+
+    <section id="install">
+      <h2>Install</h2>
+      <p class="sub">The Chrome Web Store listing is in review. Until it's live, installing takes about a minute:</p>
+      <div class="card">
+        <ol class="steps">
+          <li>Download <a href="https://github.com/aluz123/unfarm/releases/latest/download/unfarm-extension.zip">unfarm-extension.zip</a> and unzip it.</li>
+          <li>Open <code>chrome://extensions</code> and turn on <b>Developer mode</b> (top right).</li>
+          <li>Click <b>Load unpacked</b> and choose the unzipped folder. Works in Chrome, Edge, Brave and Arc.</li>
+          <li>Open x.com and scroll. Click the Unfarm icon to see how much of your feed was slop today.</li>
+        </ol>
+        <p class="small" style="margin:12px 0 0">Or let your coding agent do it: <code>Install the Chrome extension from github.com/aluz123/unfarm (load the extension/ folder unpacked)</code></p>
+      </div>
+    </section>
+
+    <section>
+      <h2>Free, and Pro coming</h2>
+      <div class="pricing">
+        <div class="card tier"><h3>Unfarm</h3><div class="price">Free</div><p class="small">Forever, open source (MIT).</p><ul><li>Copy-paste and farm-account hiding with receipts</li><li>AI bait rules with 3 sensitivity levels</li><li>Daily-updated public farm list</li><li>Your daily “slop score”</li></ul></div>
+        <div class="card tier pro"><h3>Unfarm Pro</h3><div class="price">$4<span class="small">/month</span></div><p class="small">In development.</p><ul><li>AI image and video farm detection: the same generated clip reposted by 40 accounts</li><li>Copycat alerts for creators: find out when a farm reposts your post word for word</li><li>LinkedIn and Threads</li><li>List updates every hour instead of daily</li></ul><p style="margin:14px 0 0"><a class="btn" href="https://github.com/aluz123/unfarm/discussions" style="height:40px">Get notified: watch the repo</a></p></div>
+      </div>
+    </section>
+
+    <section class="faq">
+      <h2>Questions</h2>
+      <details><summary>Is this censorship?</summary><p>No. It's your feed and your filter. Hidden posts stay one click away (“Show”), you choose the sensitivity, and you can turn any category off.</p></details>
+      <details><summary>What data does it collect?</summary><p>None. Unfarm downloads two public JSON lists a few times a day and does everything else in your browser. It never sends the posts you read, your handle or your browsing anywhere. Your stats stay in local extension storage.</p></details>
+      <details><summary>What if it hides something real?</summary><p>Click “Not slop” and that account is never hidden again. If an account is wrongly on the public list, open an issue and it's removed. Copy-paste clusters need at least two different accounts posting the same text, and farm accounts need repeated copying.</p></details>
+      <details><summary>Does it work on the X app on my phone?</summary><p>Not yet. Unfarm is a desktop browser extension for x.com. Mobile is on the Pro roadmap.</p></details>
+      <details><summary>How is the list built?</summary><p>A crawler samples several thousand viral posts a day, fingerprints the opening of each post with MinHash, and groups near-identical text from different accounts. The code is in <a href="https://github.com/aluz123/unfarm">the repo</a>, and the engine is the same file the extension runs.</p></details>
+    </section>
+
+    <footer>
+      <span>Unfarm is open source (MIT). Not affiliated with X Corp.</span>
+      <span><a href="https://github.com/aluz123/unfarm">GitHub</a> · <a href="https://github.com/aluz123/unfarm/issues">Report a problem</a></span>
+    </footer>
+  </div>
+
+  <script type="module">
+    import * as E from './extension/src/engine.js';
+    const $ = (s) => document.querySelector(s);
+    const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    const fmt = (n) => Number(n || 0).toLocaleString('en-US');
+    const day = (ts) => new Date(ts * 1000).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+
+    const [fp, fa, st] = await Promise.all(['fingerprints', 'farms', 'stats'].map((n) => fetch(`data/${n}.json`, { cache: 'no-cache' }).then((r) => r.json())));
+    const listIndex = E.indexFromList(fp);
+    const farms = new Set(fa.farms.map((f) => f.handle));
+    const farmInfo = new Map(fa.farms.map((f) => [f.handle, f]));
+
+    // stats
+    const pct = (st.copied_share * 100).toFixed(1);
+    $('#stats').innerHTML = `
+      <div class="stat"><b>${fmt(st.sampled_posts)}</b><span>viral posts scanned in the latest crawl</span></div>
+      <div class="stat"><b>${pct}%</b><span>were copy-pasted by more than one account</span></div>
+      <div class="stat"><b>${fmt(fp.clusters.length)}</b><span>copy-paste clusters on the list</span></div>
+      <div class="stat"><b>${fmt(fa.farms.length)}</b><span>accounts caught copy-pasting repeatedly</span></div>`;
+    if (fp.clusters[0]) $('#demoN').textContent = fp.clusters[0].accounts;
+    $('#farmsSub').textContent = `The same text, posted by different accounts. Updated ${new Date(fp.updated).toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}. Click a cluster for the accounts and links.`;
+
+    // clusters
+    $('#clusters').innerHTML = fp.clusters.slice(0, 40).map((c) => `
+      <details class="cluster" id="c-${esc(c.id)}">
+        <summary><div class="count">${c.accounts}<small>accounts</small></div>
+          <div><div class="ctext">${esc(c.sample.slice(0, 260))}${c.sample.length > 260 ? '…' : ''}</div>
+          <div class="cmeta">${c.posts} posts · ${fmt(c.likes)} likes · seen ${day(c.first_seen)}–${day(c.last_seen)}</div></div></summary>
+        <div class="cbody"><div style="margin-bottom:8px">${c.authors.map((a) => `<a href="https://x.com/${esc(a)}" target="_blank" rel="noopener">@${esc(a)}</a>`).join('')}</div>
+          <div>${(c.examples || []).map((e, i) => `<a href="${esc(e.url)}" target="_blank" rel="noopener">post ${i + 1}</a>`).join('')}</div></div>
+      </details>`).join('');
+
+    $('#farmTable').innerHTML = '<thead><tr><th>Account</th><th>Copied posts</th><th>Clusters</th></tr></thead><tbody>' + fa.farms.slice(0, 60).map((f) => `<tr id="a-${esc(f.handle)}"><td><a href="https://x.com/${esc(f.handle)}" target="_blank" rel="noopener">@${esc(f.handle)}</a></td><td>${f.copies}</td><td>${f.cluster_ids.map((id) => `<a href="#c=${esc(id)}">${esc(id.slice(0, 6))}</a>`).join(' ')}</td></tr>`).join('') + '</tbody>';
+
+    // deep links from the extension: #c=<cluster> or #a=<handle>
+    function follow() {
+      const p = new URLSearchParams(location.hash.slice(1));
+      if (p.get('c')) {
+        const el = document.getElementById('c-' + p.get('c'));
+        if (el) { el.open = true; el.classList.add('flash'); el.scrollIntoView({ behavior: 'smooth', block: 'center' }); setTimeout(() => el.classList.remove('flash'), 2500); }
+      }
+      if (p.get('a')) {
+        const el = document.getElementById('a-' + p.get('a').toLowerCase());
+        if (el) { el.classList.add('flash'); el.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
+      }
+    }
+    window.addEventListener('hashchange', follow);
+    follow();
+
+    // check a post
+    function check() {
+      const text = $('#txt').value.trim();
+      if (!text) { $('#verdict').innerHTML = ''; return; }
+      const r = E.classify({ text, author: '' }, { listIndex, farms, farmInfo, sensitivity: 'balanced' });
+      const strict = E.classify({ text, author: '' }, { listIndex, sensitivity: 'strict' });
+      if (r.verdict === 'hide') {
+        const items = r.reasons.map((x) => {
+          if (x.kind === 'copypasta') return `<li>${esc(x.label)}. <a href="#c=${esc(x.cluster.id)}">See the receipts</a></li>`;
+          if (x.kind === 'bait') return `<li>AI bait (score ${x.weight}): ${esc(x.hits.filter((h) => !['formatting', 'topic'].includes(h.id)).map((h) => h.label).join(', '))}</li>`;
+          return `<li>${esc(x.label)}</li>`;
+        }).join('');
+        $('#verdict').innerHTML = `<div class="verdict hide"><b>Unfarm would hide this.</b><ul>${items}</ul></div>`;
+      } else if (strict.verdict === 'hide') {
+        $('#verdict').innerHTML = `<div class="verdict ok"><b>Shown on balanced.</b> Strict mode would hide it: ${esc(strict.reasons.map((x) => x.label).join(', '))}.</div>`;
+      } else {
+        $('#verdict').innerHTML = `<div class="verdict ok"><b>Looks human.</b> No copy-paste match and no bait patterns.</div>`;
+      }
+    }
+    let t; $('#txt').addEventListener('input', () => { clearTimeout(t); t = setTimeout(check, 200); });
+  </script>
+</body>
+</html>

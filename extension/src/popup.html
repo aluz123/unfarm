@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Unfarm</title>
+  <link rel="stylesheet" href="ui.css">
+</head>
+<body class="popup">
+  <header class="row">
+    <img src="../icons/icon-32.png" width="22" height="22" alt="">
+    <strong class="brand">Unfarm</strong>
+    <label class="switch" title="Turn Unfarm on or off">
+      <input type="checkbox" id="enabled">
+      <span></span>
+    </label>
+  </header>
+
+  <section class="hero">
+    <div class="big" id="pct">–</div>
+    <div class="muted" id="sub">Scroll X to start.</div>
+  </section>
+
+  <section class="kinds" id="kinds"></section>
+
+  <section>
+    <div class="label">Sensitivity</div>
+    <div class="seg" id="sens">
+      <button type="button" data-v="gentle">Gentle</button>
+      <button type="button" data-v="balanced">Balanced</button>
+      <button type="button" data-v="strict">Strict</button>
+    </div>
+    <p class="hint" id="sensHint"></p>
+  </section>
+
+  <section>
+    <div class="label">Hidden posts</div>
+    <div class="seg" id="mode">
+      <button type="button" data-v="collapse">Collapse</button>
+      <button type="button" data-v="label">Label only</button>
+      <button type="button" data-v="remove">Remove</button>
+    </div>
+  </section>
+
+  <section class="share">
+    <button type="button" class="primary" id="share">Share my slop score</button>
+    <a id="tweet" target="_blank" rel="noopener">Post it on X</a>
+  </section>
+
+  <footer>
+    <div class="muted small" id="lists">Loading farm list…</div>
+    <div class="row small links">
+      <button type="button" class="link" id="refresh">Update list</button>
+      <a href="options.html" target="_blank">Settings</a>
+      <a href="https://aluz123.github.io/unfarm/" target="_blank" rel="noopener">Receipts</a>
+    </div>
+  </footer>
+  <script type="module" src="popup.js"></script>
+</body>
+</html>
