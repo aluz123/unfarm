@@ -11,7 +11,7 @@ const shot = process.argv[3];
 const CHROME = process.env.CHROME || '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
 const port = 9333 + Math.floor(Math.random() * 500);
 const profile = mkdtempSync(join(process.env.TMPDIR || tmpdir(), 'unfarm-e2e-'));
-const chrome = spawn(CHROME, ['--headless=new', `--remote-debugging-port=${port}`, '--enable-unsafe-extension-debugging', '--remote-allow-origins=*', `--user-data-dir=${profile}`, '--window-size=1100,2400', '--no-first-run', '--no-default-browser-check', '--user-agent=Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/156.0.0.0 Safari/537.36', 'about:blank'], { stdio: 'ignore' });
+const chrome = spawn(CHROME, ['--headless=new', `--remote-debugging-port=${port}`, '--enable-unsafe-extension-debugging', '--remote-allow-origins=*', `--user-data-dir=${profile}`, `--window-size=${process.env.WINDOW || '1100,2400'}`, '--no-first-run', '--no-default-browser-check', '--user-agent=Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/156.0.0.0 Safari/537.36', 'about:blank'], { stdio: 'ignore' });
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 async function cdp(wsUrl) {
