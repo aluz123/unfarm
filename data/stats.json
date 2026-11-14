@@ -1,13 +1,13 @@
 {
- "updated": "2026-11-13T15:30:12.000Z",
- "sampled_posts": 946,
- "scored_posts": 819,
- "copied_posts": 169,
- "clusters": 277,
- "farms": 141,
+ "updated": "2026-11-14T15:30:11.000Z",
+ "sampled_posts": 93,
+ "scored_posts": 85,
+ "copied_posts": 110,
+ "clusters": 255,
+ "farms": 132,
  "biggest": {
   "accounts": 28,
   "sample": "🚨 BREAKING NEWS: Gmail Users Need to Read This!\n\nIf you have a Gmail account, you need to read this.\n\nGoogle’s AI is no"
  },
- "copied_share": 0.0281
+ "copied_share": 0
 }
